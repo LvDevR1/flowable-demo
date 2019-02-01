@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             id="definitions"
+             targetNamespace="http://flowable.org/bpmn20"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+
+    <process id="firstProcess" name="Default first process">
+
+        <startEvent id="theStart"/>
+
+        <sequenceFlow sourceRef="theStart" targetRef="firstTask"/>
+
+        <!-- First task-->
+
+        <serviceTask id="firstTask" name="First task"
+                     flowable:resultVariable="result" flowable:expression="#{demoProcessService.isShortText(testText)}">
+        </serviceTask>
+
+        <sequenceFlow sourceRef="firstTask" targetRef="decisionGateway"/>
+
+        <!-- Second task -->
+
+        <exclusiveGateway id="decisionGateway" name="ShortTextDecisionGateway"/>
+
+        <sequenceFlow sourceRef="decisionGateway" targetRef="shortTextHandle">
+            <conditionExpression xsi:type="tFormalExpression">${result}</conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow sourceRef="decisionGateway" targetRef="longTextHandle">
+            <conditionExpression xsi:type="tFormalExpression">${!result}</conditionExpression>
+        </sequenceFlow>
+
+
+        <serviceTask id="shortTextHandle" name="Handle short text"
+                     flowable:expression="#{demoProcessService.handleShortText()}">
+        </serviceTask>
+
+        <sequenceFlow sourceRef="shortTextHandle" targetRef="theEnd"/>
+
+
+        <serviceTask id="longTextHandle" name="Handle long text"
+                      flowable:expression="#{demoProcessService.handleLongText()}">
+        </serviceTask>
+        <sequenceFlow sourceRef="longTextHandle" targetRef="theEnd"/>
+
+        <endEvent id="theEnd"/>
+
+    </process>
+</definitions>
